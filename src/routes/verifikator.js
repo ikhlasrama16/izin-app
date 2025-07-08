@@ -1,15 +1,14 @@
-const router = require('express').Router();
-const protect = require('../middleware/auth');
-const authorize = require('../middleware/role');
-const ctrl = require('../controller/verifikatorController');
+const router = require("express").Router();
+const protect = require("../middleware/auth");
+const authorize = require("../middleware/role");
+const ctrl = require("../controller/verifikatorController");
 
-/* hanya verifikator */
-router.use(protect, authorize('verifikator'));
+router.use(protect, authorize("verifikator"));
 
-router.get('/users',            ctrl.listUserRegistrations);
-router.patch('/users/:id/verify', ctrl.verifyUser);
+router.get("/users", ctrl.listUserRegistrations);
+router.patch("/users/:id/verify", ctrl.verifyUser);
 
-router.get('/izin',             ctrl.listIzin);
-router.patch('/izin/:id',       ctrl.processIzin);
+router.get("/izin", ctrl.listIzin);
+router.patch("/izin/:id", ctrl.processIzin);
 
 module.exports = router;
