@@ -49,6 +49,12 @@ exports.updateIzin = async (req, res) => {
   izin.tanggalSelesai = tanggalSelesai || izin.tanggalSelesai;
   izin.keterangan = keterangan || izin.keterangan;
 
+  // ✅ Jika sebelumnya direvisi, ubah status menjadi resubmitted
+  if (izin.status === "revised") {
+    izin.status = "resubmitted";
+    izin.komentarVerifikator = ""; // Kosongkan komentar sebelumnya
+  }
+
   await izin.save();
   res.json(izin);
 };
@@ -66,8 +72,27 @@ exports.cancelIzin = async (req, res) => {
       .json({ message: "Izin tidak bisa dibatalkan karena sudah diproses" });
 
   izin.dibatalkan = true;
-  izin.status = "revised";
+  izin.status = "cancelled";
 
   await izin.save();
   res.json({ message: "Izin berhasil dibatalkan", izin });
+};
+
+// Hapus izin permanen (hanya jika milik user & belum diproses)
+exports.deleteIzin = async (req, res) => {
+  const izin = await Izin.findById(req.params.id);
+
+  if (!izin) return res.status(404).json({ message: "Izin tidak ditemukan" });
+  if (izin.user.toString() !== req.user.id)
+    return res.status(403).json({ message: "Bukan izin milik Anda" });
+
+  // Kalau sudah diproses, tidak bisa dihapus
+  if (!["submitted", "revised", "resubmitted"].includes(izin.status)) {
+    return res
+      .status(400)
+      .json({ message: "Izin tidak bisa dihapus karena sudah diproses" });
+  }
+
+  await izin.deleteOne();
+  res.json({ message: "Izin berhasil dihapus" });
 };

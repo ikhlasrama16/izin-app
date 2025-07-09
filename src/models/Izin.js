@@ -26,9 +26,10 @@ const izinSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["submitted", "revised", "accepted", "rejected", "cancelled"],
+      enum: ["submitted", "accepted", "rejected", "revised", "resubmitted"],
       default: "submitted",
     },
+
     komentarVerifikator: {
       type: String,
       default: "",

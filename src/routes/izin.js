@@ -18,4 +18,6 @@ router.patch("/:id", ctrl.updateIzin);
 // DELETE /api/izin/:id → batalkan izin
 router.delete("/:id", ctrl.cancelIzin);
 
+router.delete("/:id/permanent", ctrl.deleteIzin);
+
 module.exports = router;
