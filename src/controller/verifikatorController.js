@@ -3,11 +3,14 @@ const Izin = require("../models/Izin");
 
 /* GET daftar user dengan filter verifikasi */
 exports.listUserRegistrations = async (req, res) => {
-  const { verified } = req.query; // true | false
-  const users = await User.find({
-    role: "user",
-    isVerified: verified === "true",
-  }).select("-password");
+  const { verified } = req.query;
+
+  const filter = { role: "user" };
+
+  if (verified === "true") filter.isVerified = true;
+  else if (verified === "false") filter.isVerified = false;
+
+  const users = await User.find(filter).select("-password");
   res.json(users);
 };
 

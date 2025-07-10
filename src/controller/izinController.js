@@ -1,14 +1,28 @@
 const Izin = require("../models/Izin");
+const User = require("../models/User");
 
 exports.createIzin = async (req, res) => {
   const { jenis, tanggalMulai, tanggalSelesai, keterangan } = req.body;
 
   try {
+    // Validasi tanggal
     if (new Date(tanggalMulai) > new Date(tanggalSelesai)) {
       return res.status(400).json({
         message: "Tanggal mulai tidak boleh lebih besar dari tanggal selesai",
       });
     }
+
+    // Ambil data user dari DB
+    const user = await User.findById(req.user.id);
+
+    // Cek apakah sudah diverifikasi
+    if (!user || !user.isVerified) {
+      return res.status(403).json({
+        message: "Akun Anda belum diverifikasi dan tidak dapat mengajukan izin",
+      });
+    }
+
+    // Buat izin
     const izin = await Izin.create({
       user: req.user.id,
       jenis,
@@ -16,14 +30,14 @@ exports.createIzin = async (req, res) => {
       tanggalSelesai,
       keterangan,
     });
+
     res.status(201).json(izin);
-  } catch (error) {
+  } catch (err) {
     res
       .status(500)
       .json({ message: "Gagal mengajukan izin", error: err.message });
   }
 };
-
 // lihat izin milik user yang login
 exports.getMyIzin = async (req, res) => {
   const izins = await Izin.find({ user: req.user.id }).sort({ createdAt: -1 });
